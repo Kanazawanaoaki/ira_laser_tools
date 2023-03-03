@@ -179,29 +179,29 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan,
 		if (clouds_modified[i])
 			totalClouds++;
 
-	// Go ahead only if all subscribed scans have arrived
-	if (totalClouds == clouds_modified.size())
-	{
-		pcl::PCLPointCloud2 merged_cloud = clouds[0];
-		clouds_modified[0] = false;
+	// // Go ahead only if all subscribed scans have arrived
+	// if (totalClouds == clouds_modified.size())
+	// {
+    pcl::PCLPointCloud2 merged_cloud = clouds[0];
+    clouds_modified[0] = false;
 
-		for (int i = 1; i < clouds_modified.size(); i++)
-		{
-			#if PCL_VERSION_COMPARE(>=, 1, 10, 0)
-				pcl::concatenate(merged_cloud, clouds[i], merged_cloud);
-			#else
-				pcl::concatenatePointCloud(merged_cloud, clouds[i], merged_cloud);
-			#endif
-				clouds_modified[i] = false;
-		}
-
-		point_cloud_publisher_.publish(merged_cloud);
-
-		Eigen::MatrixXf points;
-		getPointCloudAsEigen(merged_cloud, points);
-
-		pointcloud_to_laserscan(points, &merged_cloud);
+    for (int i = 1; i < clouds_modified.size(); i++)
+    {
+       #if PCL_VERSION_COMPARE(>=, 1, 10, 0)
+          pcl::concatenate(merged_cloud, clouds[i], merged_cloud);
+       #else
+		  pcl::concatenatePointCloud(merged_cloud, clouds[i], merged_cloud);
+	   #endif
+		  clouds_modified[i] = false;
 	}
+
+	point_cloud_publisher_.publish(merged_cloud);
+
+	Eigen::MatrixXf points;
+	getPointCloudAsEigen(merged_cloud, points);
+
+	pointcloud_to_laserscan(points, &merged_cloud);
+	// }
 }
 
 void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPointCloud2 *merged_cloud)
